@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه وام</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            text-align: right;
+            margin: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            text-align: left;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+
+        .results p {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>محاسبه وام</h1>
+        <form id="loanForm">
+            <label for="totalAmount">مبلغ کل وام (تومان):</label>
+            <input type="text" id="totalAmount" placeholder="مثال: 100,000,000" required>
+
+            <label for="months">مدت وام (ماه):</label>
+            <input type="number" id="months" placeholder="مثال: 25" required>
+
+            <label for="annualInterestRate">نرخ سود سالانه (%):</label>
+            <input type="number" id="annualInterestRate" placeholder="مثال: 43" required>
+
+            <label for="downPayment">پیش‌پرداخت (تومان):</label>
+            <input type="text" id="downPayment" placeholder="مثال: 0" required>
+
+            <button type="button" onclick="calculateLoan()">محاسبه</button>
+        </form>
+
+        <div class="results" id="results" style="display: none;">
+            <h2>نتایج محاسبه:</h2>
+            <p id="loanAmount"></p>
+            <p id="monthlyPayment"></p>
+            <p id="totalInterest"></p>
+            <p id="totalPayment"></p>
+        </div>
+    </div>
+
+    <script>
+        // تابع برای فرمت کردن اعداد به صورت سه رقم سه رقم
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // تابع محاسبه وام
+        function calculateLoan() {
+            const totalAmount = parseFloat(document.getElementById("totalAmount").value.replace(/,/g, '')) || 0;
+            const months = parseInt(document.getElementById("months").value) || 0;
+            const annualInterestRate = parseFloat(document.getElementById("annualInterestRate").value) || 0;
+            const downPayment = parseFloat(document.getElementById("downPayment").value.replace(/,/g, '')) || 0;
+
+            if (totalAmount <= 0 || months <= 0 || annualInterestRate < 0 || downPayment < 0) {
+                alert("لطفاً مقادیر معتبر وارد کنید.");
+                return;
+            }
+
+            // محاسبه مبلغ وام پس از کسر پیش‌پرداخت
+            const loanAmount = totalAmount - downPayment;
+
+            // نرخ سود ماهانه
+            const monthlyInterestRate = (annualInterestRate / 100) / 12;
+
+            // محاسبه مبلغ قسط ماهانه
+            const monthlyPayment = (loanAmount * monthlyInterestRate) /
+                (1 - Math.pow(1 + monthlyInterestRate, -months));
+
+            // محاسبه مجموع سود و مجموع مبلغ پرداختی
+            const totalPayment = monthlyPayment * months;
+            const totalInterest = totalPayment - loanAmount;
+
+            // نمایش نتایج
+            document.getElementById("results").style.display = "block";
+            document.getElementById("loanAmount").innerText = `مبلغ وام پس از کسر پیش‌پرداخت: ${formatNumber(loanAmount.toFixed(0))} تومان`;
+            document.getElementById("monthlyPayment").innerText = `مبلغ قسط ماهانه: ${formatNumber(monthlyPayment.toFixed(0))} تومان`;
+            document.getElementById("totalInterest").innerText = `مجموع سود وام: ${formatNumber(totalInterest.toFixed(0))} تومان`;
+            document.getElementById("totalPayment").innerText = `مجموع مبلغ پرداختی: ${formatNumber(totalPayment.toFixed(0))} تومان`;
+        }
+
+        // افزودن فرمت سه رقم سه رقم به ورودی‌ها
+        document.querySelectorAll("input[type='text']").forEach(input => {
+            input.addEventListener("input", function (e) {
+                const value = this.value.replace(/,/g, '');
+                if (!isNaN(value) && value !== "") {
+                    this.value = formatNumber(value);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
